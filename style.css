@@ -1,0 +1,144 @@
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      text-align: center;
+      background: linear-gradient(to right, #141e30, #243b55);
+      color: #f4f4f4;
+      padding: 20px;
+      transition: background 0.5s ease;
+    }
+
+    h1 {
+      color: #00d4ff;
+      margin-bottom: 20px;
+      transition: opacity 0.3s ease;
+    }
+
+    label, select, input {
+      font-size: 16px;
+      margin: 5px;
+      transition: opacity 0.3s ease;
+    }
+
+    input, select {
+      padding: 5px 10px;
+      border-radius: 5px;
+      border: none;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      margin-top: 15px;
+      border: none;
+      border-radius: 8px;
+      background-color: #00d4ff;
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.3s ease, opacity 0.3s ease;
+    }
+    button:hover {
+      background-color: #00a8cc;
+    }
+
+    #result {
+      margin-top: 30px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      transition: opacity 0.3s ease;
+    }
+
+    .node {
+      width: 140px;
+      height: 140px;
+      padding: 10px;
+      border-radius: 15px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.5);
+      animation: fadeIn 0.6s ease-in-out;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      font-weight: bold;
+      background: linear-gradient(to bottom, #66ffcc, #33cc99);
+      color: #000;
+    }
+
+    .traitor {
+      background: linear-gradient(to bottom, #ff6666, #cc3333);
+      color: #fff;
+    }
+
+    #result p {
+      font-size: 20px;
+      color: #16bd1e;
+      font-weight: bold;
+      margin-top: 30px;
+      width: 100%;
+      animation: glow 1.5s infinite alternate;
+    }
+
+    @keyframes fadeIn {
+      from {
+        transform: scale(0.8);
+        opacity: 0;
+      }
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    /* Temas com imagem de fundo */
+    .theme-attack {
+      background: url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1470&q=80') no-repeat center center fixed;
+      background-size: cover;
+      color: #fff !important;
+    }
+    .theme-retreat {
+      background: url('https://images.unsplash.com/photo-1500534623283-312aade485b7?auto=format&fit=crop&w=1470&q=80') no-repeat center center fixed;
+      background-size: cover;
+      color: #fff !important;
+    }
+
+    /* Ocultar elementos da interface (exceto #result) */
+    .hide-ui h1,
+    .hide-ui label,
+    .hide-ui input,
+    .hide-ui select{
+      opacity: 0;
+      pointer-events: none;
+      height: 0;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      transition: opacity 0.3s ease;
+    }
+    /* Deixar resultado full screen e mais aparente */
+    .full-result #result {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      min-height: 80vh;
+      font-size: 24px;
+      background: rgba(0, 0, 0, 0.7);
+      border-radius: 15px;
+      box-shadow: 0 0 40px rgba(255,255,255,0.8);
+      padding: 30px;
+      color: #000;
+      width: 80%;
+      margin: 0 auto;
+      animation: fadeIn 0.8s ease forwards;
+    }
+
+    /* Imagem grande para o resultado final */
+    #result img.result-image {
+      max-width: 400px;
+      margin-top: 20px;
+      border-radius: 15px;
+      box-shadow: 0 0 20px #000;
+      animation: fadeIn 1s ease forwards;
+    }

@@ -1,31 +1,857 @@
 <!DOCTYPE html>
 <head>
   <meta charset="UTF-8" />
-  <title>Jogo de Falhas Bizantinas</title>
-  <script src="controle.js" type="text/javascript"></script>
-  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Jogo de Reconhecimento de Falhas Bizantinas</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Material+Icons" rel="stylesheet" />
+  <style>
+    /* Reset */
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #000, #A0522D);
+      color: #f0f0f5;
+      min-height: 100vh;
+      display: grid;
+      grid-template-rows: 64px 1fr auto;
+      overflow-x: hidden;
+    }
+    a {
+      color: inherit;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    button {
+      font-family: 'Inter', sans-serif;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: inherit;
+      transition: background-color 0.3s ease;
+    }
+    button:focus,
+    button:hover {
+      background-color: rgba(255 255 255 / 0.1);
+      border-radius: 8px;
+      outline: none;
+    }
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255 255 255 / 0.2);
+      border-radius: 5px;
+      transition: background-color 0.3s ease;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255 255 255 / 0.4);
+    }
+    /* Header */
+    header {
+      height: 64px;
+      position: sticky;
+      top: 0;
+      backdrop-filter: blur(14px);
+      background: rgba(30, 30, 60, 0.6);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      z-index: 1000;
+      color: #ddd;
+    }
+    .brand {
+      font-weight: 800;
+      font-size: clamp(1.25rem, 3vw, 1.5rem);
+      letter-spacing: 0.06em;
+      background: linear-gradient(90deg, #9D50BB, #6E48AA);
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      user-select: none;
+    }
+    nav.header-nav {
+      display: flex;
+      gap: 24px;
+    }
+    nav.header-nav button {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: #bbb;
+      position: relative;
+    }
+    nav.header-nav button .material-icons {
+      font-size: 20px;
+      color: #9d50bb;
+      transition: color 0.3s ease;
+    }
+    nav.header-nav button:hover,
+    nav.header-nav button:focus {
+      color: #e0c3fc;
+    }
+    nav.header-nav button:hover .material-icons,
+    nav.header-nav button:focus .material-icons {
+      color: #d6a8ff;
+    }
+    /* Layout with sidebar and main */
+    .app-container {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      height: calc(100vh - 64px);
+      overflow: hidden;
+    }
+    /* Sidebar */
+    aside.sidebar {
+      background: rgba(30, 30, 45, 0.8);
+      backdrop-filter: blur(20px);
+      box-shadow: inset -1px 0 0 rgba(255 255 255 / 0.05);
+      display: flex;
+      flex-direction: column;
+      padding: 24px 16px;
+      gap: 24px;
+      overflow-y: auto;
+      position: relative;
+      z-index: 900;
+      color: #ccc;
+    }
+    .sidebar h2 {
+      font-weight: 700;
+      font-size: 1.2rem;
+      margin-bottom: 12px;
+      color: #cdb4db;
+    }
+    .nav-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .nav-list li {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 500;
+      font-size: 1rem;
+      user-select: none;
+    }
+    .nav-list li button {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      padding: 12px 16px;
+      background: transparent;
+      border-radius: 12px;
+      transition: background-color 0.3s ease;
+      color: #ccc;
+    }
+    .nav-list li button .material-icons {
+      font-size: 24px;
+      color: #9d50bb;
+    }
+    .nav-list li button:hover,
+    .nav-list li button:focus {
+      background-color: rgba(157, 80, 187, 0.4);
+      color: #e0c3fc;
+      outline: none;
+    }
+    /* Notification badge */
+    .badge {
+      background: #d946ef;
+      color: white;
+      font-weight: 700;
+      font-size: 0.75rem;
+      padding: 2px 6px;
+      border-radius: 12px;
+      margin-left: auto;
+      box-shadow: 0 0 6px #d946ef88;
+    }
+    /* Main Content */
+    main.content {
+      position: relative;
+      background: rgba(30, 30, 45, 0.6);
+      backdrop-filter: blur(20px);
+      padding: 32px 48px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 40px;
+      min-height: calc(100vh - 64px);
+    }
+    /* Titles and descriptions */
+    .section-title {
+      font-size: clamp(1.6rem, 3vw, 2.5rem);
+      font-weight: 800;
+      background: linear-gradient(90deg, #9D50BB, #6E48AA);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 24px;
+      user-select: none;
+    }
+    p.description {
+      font-size: 1.15rem;
+      max-width: 720px;
+      line-height: 1.6;
+      color: #ddd;
+    }
+    /* Simulation container */
+    .simulation {
+      background: rgba(255 255 255 / 0.05);
+      border-radius: 20px;
+      border: 1px solid rgba(157, 80, 187, 0.3);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      box-shadow: 0 8px 24px rgba(110, 72, 170, 0.3);
+    }
+    /* Node network */
+    .node-network {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 28px;
+      user-select: none;
+    }
+    /* Node cards */
+    .node {
+      background: rgba(48, 48, 70, 0.9);
+      border-radius: 16px;
+      padding: 18px 22px;
+      width: 120px;
+      box-shadow: 0 4px 8px rgba(110, 72, 170, 0.6);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      transition: transform 0.3s ease;
+      position: relative;
+      cursor: pointer;
+      border: 2px solid transparent;
+    }
+    .node:hover, .node:focus {
+      border-color: #d676f6;
+      outline: none;
+      transform: scale(1.07);
+      box-shadow: 0 0 12px #d676f6cc;
+    }
+    .node .material-icons {
+      font-size: 48px;
+      color: #9d50bb;
+      margin-bottom: 8px;
+      user-select: none;
+    }
+    .node .node-label {
+      font-weight: 700;
+      font-size: 1rem;
+      margin-bottom: 6px;
+      text-align: center;
+      color: #eee;
+    }
+    .node .node-status {
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: #bb86fc;
+      background-color: rgba(157,80,187,0.2);
+      padding: 2px 8px;
+      border-radius: 12px;
+      text-align: center;
+      user-select: none;
+    }
+    /* Faulty indication */
+    .node.faulty {
+      border-color: #e03e3e;
+      box-shadow: 0 0 12px 3px #e03e3eaa;
+      background: rgba(224, 62, 62, 0.9);
+      color: white;
+    }
+    .node.faulty .material-icons {
+      color: #ffb3b3;
+    }
+    /* Messages */
+    .messages {
+      max-width: 800px;
+      margin: 0 auto;
+      background: rgba(48, 48, 70, 0.85);
+      border-radius: 20px;
+      padding: 24px;
+      box-shadow: 0 6px 16px rgba(110, 72, 170, 0.7);
+      font-size: 1rem;
+      line-height: 1.5;
+      color: #ddd;
+      user-select: text;
+      min-height: 130px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    /* Buttons group */
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin-top: 16px;
+    }
+    button.primary-btn {
+      background: linear-gradient(135deg, #9d50bb, #6e48aa);
+      border-radius: 12px;
+      padding: 14px 32px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: white;
+      box-shadow: 0 6px 20px rgba(157,80,187,0.6);
+      border: none;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      user-select: none;
+    }
+    button.primary-btn:hover, button.primary-btn:focus {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 30px rgba(157,80,187,0.9);
+      outline: none;
+    }
+    button.primary-btn:disabled {
+      background: rgba(109, 88, 144, 0.4);
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+    /* Footer */
+    footer {
+      background: rgba(30, 30, 45, 0.8);
+      backdrop-filter: blur(20px);
+      padding: 20px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: #aaa;
+      font-size: 0.9rem;
+    }
+    footer a {
+      color: #9d50bb;
+      text-decoration: none;
+      font-weight: 600;
+      user-select: none;
+    }
+    footer a:hover,
+    footer a:focus {
+      text-decoration: underline;
+      outline: none;
+    }
+    /* Responsive */
+    @media (max-width: 1023px) {
+      .app-container {
+        grid-template-columns: 240px 1fr;
+      }
+      main.content {
+        padding: 24px 32px;
+      }
+    }
+    @media (max-width: 767px) {
+      body {
+        grid-template-rows: 64px 1fr 48px;
+      }
+      .app-container {
+        grid-template-columns: 1fr;
+        height: auto;
+      }
+      aside.sidebar {
+        position: fixed;
+        top: 64px;
+        left: 0;
+        width: 280px;
+        height: calc(100vh - 64px);
+        transform: translateX(-100%);
+        transition: transform 0.35s ease;
+        z-index: 1100;
+      }
+      aside.sidebar.open {
+        transform: translateX(0);
+      }
+      main.content {
+        padding: 24px 16px;
+        min-height: calc(100vh - (64px + 48px));
+      }
+      nav.header-nav {
+        display: none;
+      }
+      .mobile-menu-btn {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        border-radius: 8px;
+        padding: 8px;
+        color: #d6a8ff;
+        background: rgba(30,30,60,0.4);
+        transition: background-color 0.3s ease;
+      }
+      .mobile-menu-btn:hover,
+      .mobile-menu-btn:focus {
+        background-color: rgba(30,30,60,0.6);
+        outline: none;
+      }
+      footer {
+        position: sticky;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 48px;
+        font-size: 1rem;
+        padding: 0 16px;
+        box-shadow: 0 -2px 8px rgba(0,0,0,0.15);
+      }
+    }
+  </style>
 </head>
 <body>
-  <h1>Jogo de Detecção de Falhas Bizantinas</h1>
+  <header>
+    <div class="brand" tabindex="0">Falhas Bizantinas - Jogo de Reconhecimento</div>
+    <nav class="header-nav" aria-label="Navegação principal">
+      <button id="help-btn" aria-haspopup="dialog" aria-controls="helpDialog" aria-expanded="false">
+        <span class="material-icons" aria-hidden="true">help_outline</span> Ajuda
+      </button>
+      <button id="theme-toggle" aria-label="Alternar tema claro e escuro" title="Alternar tema claro e escuro">
+        <span class="material-icons" aria-hidden="true">brightness_6</span>
+      </button>
+    </nav>
+    <button aria-label="Abrir menu lateral" id="mobile-menu-btn" class="mobile-menu-btn" aria-expanded="false" aria-controls="sidebar">
+      <span class="material-icons">menu</span>
+    </button>
+  </header>
 
-  <label for="Nsoldados">Número de Soldados: </label>
-  <input type="number" id="Nsoldados" value="5" min="3" max="10"><br><br>
+  <div class="app-container">
+    <aside class="sidebar" id="sidebar" aria-label="Menu lateral com navegação">
+      <h2>Menu</h2>
+      <ul class="nav-list">
+        <li><button data-section="overview" class="active"><span class="material-icons">info</span> Visão Geral</button></li>
+        <li><button data-section="simulation"><span class="material-icons">settings_input_component</span> Simulação</button></li>
+        <li><button data-section="results"><span class="material-icons">assessment</span> Resultados</button></li>
+        <li><button data-section="about"><span class="material-icons">info_outline</span> Sobre Falhas Bizantinas</button></li>
+      </ul>
+    </aside>
 
-  <label for="traitorCount">Número de traidores: </label>
-  <input type="number" id="traitorCount" value="1" min="0" max="3"><br><br>
+    <main class="content" tabindex="0">
+      <section id="overview" class="section active" role="region" aria-label="Visão geral do jogo">
+        <h1 class="section-title">Visão Geral</h1>
+        <p class="description">
+          Este jogo interativo ajudará você a entender como funcionam as falhas bizantinas e como identificar nós falhos por meio do processo de consenso distribuído. 
+          Explore os conceitos e pratique reconhecendo as falhas em um cenário simulado.
+        </p>
+        <p class="description">
+          As falhas bizantinas são problemas em sistemas distribuídos onde participantes falham ou agem de forma arbitrária, 
+          tornando difícil alcançar um acordo confiável. O objetivo aqui é identificar quais nós estão com comportamento anômalo.
+        </p>
+      </section>
 
-  <label for="ordem">Comando do comandante:</label>
-  <select id="ordem">
-    <option value="ATACAR">ATACAR</option>
-    <option value="RECUAR">RECUAR</option>
-  </select><br><br>
+      <section id="simulation" class="section" role="region" aria-label="Simulação do processo de reconhecimento">
+        <h1 class="section-title">Simulação de Reconhecimento de Falhas</h1>
+        <div class="simulation" aria-live="polite">
+          <p class="description" id="simulation-instruction" tabindex="0">Clique nos nós que você acha que estão apresentando falhas para identificá-los. Use as mensagens abaixo para ajudar em sua análise.</p>
 
-  <button id="b1" name="b1" onclick="startSimulation()">Simular</button>
-  <button id="b2" name="b2" onclick="recarregar()">Reiniciar</button>
+          <div class="node-network" role="list" aria-label="Rede de nós do sistema">
+            <!-- Nodes dynamically generated in JS -->
+          </div>
 
-  <h2>Resultado:</h2>
-  <div id="result"></div>
+          <div class="messages" aria-live="polite" aria-atomic="true" id="Mbox" tabindex="0">
+            <!-- Messages displayed here -->
+          </div>
 
-  
+          <div class="buttons">
+            <button class="primary-btn" id="next-round-btn" disabled>Próxima Rodada</button>
+            <button class="primary-btn" id="reset-btn">Reiniciar</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="results" class="section" role="region" aria-label="Resultados e análise">
+        <h1 class="section-title">Resultados</h1>
+        <p class="description" id="results-summary" tabindex="0">
+          Nenhuma simulação realizada ainda.
+        </p>
+      </section>
+
+      <section id="about" class="section" role="region" aria-label="Informações sobre falhas bizantinas">
+        <h1 class="section-title">Sobre Falhas Bizantinas</h1>
+        <p class="description">
+          As falhas bizantinas representam problemas em sistemas distribuídos, em que participantes podem agir de forma arbitrária ou mal-intencionada, 
+          dificultando a obtenção de um consenso confiável. Elas inspiram diversas pesquisas em tolerância a falhas e algoritmos robustos.
+        </p>
+        <p class="description">
+          O problema recebe esse nome a partir do famoso "Problema dos Generais Bizantinos", que explica as dificuldades em alcançar um acordo seguro quando algumas partes podem enganar outras.
+        </p>
+        <p class="description">
+          Este jogo ajuda a praticar o reconhecimento visual e lógico dessas falhas, facilitando o entendimento profundo do comportamento de sistemas distribuídos.
+        </p>
+      </section>
+    </main>
+  </div>
+
+  <!-- Help dialog -->
+  <dialog id="helpDialog" aria-modal="true" role="dialog" aria-labelledby="helpDialogTitle">
+    <h2 id="helpDialogTitle">Como jogar</h2>
+    <p>
+      Na simulação, vários nós enviam mensagens para o sistema. Alguns nós podem estar apresentando falhas bizantinas, enviando mensagens contraditórias ou incorretas.
+    </p>
+    <p>
+      Clique nos nós que você acredita serem falhos para marcá-los. Após analisar as mensagens, pressione "Próxima Rodada" para avançar e observar as consequências.
+    </p>
+    <p>
+      Utilize o painel de resultados para acompanhar suas escolhas e aprender com o processo.
+    </p>
+    <button id="helpCloseBtn" class="primary-btn">Fechar</button>
+  </dialog>
+
+ <script>
+  const nodesData = [
+    { id: 1, label: 'Nó 1', faulty: false },
+    { id: 2, label: 'Nó 2', faulty: true },
+    { id: 3, label: 'Nó 3', faulty: false },
+    { id: 4, label: 'Nó 4', faulty: true },
+    { id: 5, label: 'Nó 5', faulty: false }
+  ];
+
+  const rounds = [
+    [
+      { from: 1, message: 'Concordo com o valor proposto' },
+      { from: 2, message: 'Valor incoerente detectado' },
+      { from: 3, message: 'Confirmando recepção do valor' },
+      { from: 4, message: 'Rejeito o valor - divergência detectada' },
+      { from: 5, message: 'Valor aceito' }
+    ],
+    [
+      { from: 1, message: 'Todos os nós parecem consistentes' },
+      { from: 2, message: 'Nota: Recebi mensagens contraditórias' },
+      { from: 3, message: 'Enviando confirmação' },
+      { from: 4, message: 'Tentando confundir os outros' },
+      { from: 5, message: 'Confirmo comportamento legítimo' }
+    ],
+    [
+      { from: 1, message: 'Consenso parcial alcançado' },
+      { from: 2, message: 'Mensagem falsa enviada' },
+      { from: 3, message: 'Participando do consenso' },
+      { from: 4, message: 'Distorcendo informações' },
+      { from: 5, message: 'Funcionamento normal' }
+    ]
+  ];
+
+  let currentRound = Math.floor(Math.random() * rounds.length);
+  const selectedFaultyNodes = new Set();
+
+  const nodeNetworkEl = document.querySelector('.node-network');
+  const messageBoxEl = document.getElementById('Mbox');
+  const nextRoundBtn = document.getElementById('next-round-btn');
+  const resetBtn = document.getElementById('reset-btn');
+  const resultsSummaryEl = document.getElementById('results-summary');
+  const sidebarButtons = document.querySelectorAll('.nav-list button');
+  const sections = document.querySelectorAll('main.content section.section');
+  const helpDialog = document.getElementById('helpDialog');
+  const helpBtn = document.getElementById('help-btn');
+  const helpCloseBtn = document.getElementById('helpCloseBtn');
+  const themeToggleBtn = document.getElementById('theme-toggle');
+  const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+  const sidebar = document.getElementById('sidebar');
+
+  function focusFirstDescendant(element) {
+    for (const child of element.children) {
+      if (child.tabIndex >= 0) {
+        child.focus();
+        return true;
+      }
+      if (focusFirstDescendant(child)) return true;
+    }
+    return false;
+  }
+
+  function renderNodes() {
+    nodeNetworkEl.innerHTML = '';
+    nodesData.forEach(node => {
+      const isFaulty = selectedFaultyNodes.has(node.id);
+      const div = document.createElement('div');
+      div.className = 'node';
+      div.setAttribute('role', 'listitem');
+      div.setAttribute('tabindex', '0');
+      div.setAttribute('aria-pressed', isFaulty ? 'true' : 'false');
+      div.dataset.nodeId = node.id;
+
+      if (isFaulty) div.classList.add('faulty');
+
+      div.innerHTML = `
+        <span class="material-icons" aria-hidden="true">account_circle</span>
+        <span class="node-label">${node.label}</span>
+        <span class="node-status">${isFaulty ? 'Marcado Falho' : 'OK'}</span>
+      `;
+
+      div.addEventListener('click', () => toggleFaulty(node.id));
+      div.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          toggleFaulty(node.id);
+        }
+      });
+
+      nodeNetworkEl.appendChild(div);
+    });
+  }
+
+  function toggleFaulty(nodeId) {
+    if (selectedFaultyNodes.has(nodeId)) {
+      selectedFaultyNodes.delete(nodeId);
+    } else {
+      selectedFaultyNodes.add(nodeId);
+    }
+    renderNodes();
+    updateNextRoundButton();
+    announce(`Nó ${nodeId} ${selectedFaultyNodes.has(nodeId) ? 'marcado como falho' : 'desmarcado'}.`);
+  }
+
+  function updateNextRoundButton() {
+    nextRoundBtn.disabled = selectedFaultyNodes.size === 0;
+  }
+
+  function renderMessages() {
+    console.log("Carregando as mensagens");
+    messageBoxEl.innerHTML = '';
+    const roundMessages = rounds[currentRound];
+
+    roundMessages.forEach(msg => {
+      const p = document.createElement('p');
+      p.style.marginBottom = '6px';
+      const node = nodesData.find(n => n.id == msg.from);
+      if (!node) return;
+      p.textContent = `${node.label}: ${msg.message}`;
+      messageBoxEl.appendChild(p);
+      console.log(p);
+    });
+
+    messageBoxEl.focus();
+  }
+
+  function announce(text) {
+    messageBoxEl.setAttribute('aria-live', 'polite');
+    messageBoxEl.textContent = text;
+    setTimeout(() => {
+      messageBoxEl.textContent = '';
+    }, 2000);
+  }
+
+  nextRoundBtn.addEventListener('click', () => {
+    if (currentRound < rounds.length - 1) {
+      currentRound++;
+      renderMessages();
+      clearSelections();
+      updateNextRoundButton();
+    } else {
+      showResults();
+    }
+  });
+
+ resetBtn.addEventListener('click', () => {
+  location.reload();
+});
+
+  function clearSelections() {
+    selectedFaultyNodes.clear();
+    renderNodes();
+  }
+
+  function showResults() {
+    const correctNodes = nodesData.filter(n => n.faulty).map(n => n.id);
+    const selectedNodes = Array.from(selectedFaultyNodes);
+    const correctlyIdentified = selectedNodes.filter(id => correctNodes.includes(id));
+    const missed = correctNodes.filter(id => !selectedNodes.includes(id));
+    const falsePositives = selectedNodes.filter(id => !correctNodes.includes(id));
+
+    let resultMsg = '';
+    if (correctlyIdentified.length === correctNodes.length && falsePositives.length === 0) {
+      resultMsg = 'Parabéns! Você identificou corretamente todos os nós falhos sem erros.';
+    } else {
+      resultMsg = `Você identificou ${correctlyIdentified.length} nó(s) falho(s) corretamente.\n`;
+      if (missed.length) {
+        resultMsg += `Nó(s) falho(s) não marcados: ${missed.map(id => 'Nó ' + id).join(', ')}.\n`;
+      }
+      if (falsePositives.length) {
+        resultMsg += `Nó(s) marcados incorretamente: ${falsePositives.map(id => 'Nó ' + id).join(', ')}.`;
+      }
+    }
+    resultsSummaryEl.textContent = resultMsg;
+    switchSection('results');
+    announce('Resultados exibidos.');
+  }
+
+  function clearResults() {
+    resultsSummaryEl.textContent = 'Nenhuma simulação realizada ainda.';
+  }
+
+  sidebarButtons.forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.preventDefault();
+      const target = btn.dataset.section;
+      switchSection(target);
+    });
+  });
+
+  function switchSection(sectionId) {
+    sections.forEach(sec => {
+      const active = sec.id === sectionId;
+      sec.classList.toggle('active', active);
+      sec.style.display = active ? 'block' : 'none';
+      sec.setAttribute('aria-hidden', String(!active));
+    });
+
+    sidebarButtons.forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.section === sectionId);
+    });
+
+    if (window.innerWidth <= 767) {
+      toggleSidebar(false);
+      mobileMenuBtn.setAttribute('aria-expanded', 'false');
+    }
+  }
+
+  helpBtn.addEventListener('click', () => {
+    helpDialog.showModal();
+    helpBtn.setAttribute('aria-expanded', 'true');
+    focusFirstDescendant(helpDialog);
+  });
+
+  helpCloseBtn.addEventListener('click', () => {
+    helpDialog.close();
+    helpBtn.setAttribute('aria-expanded', 'false');
+    helpBtn.focus();
+  });
+
+  helpDialog.addEventListener('cancel', () => {
+    helpDialog.close();
+    helpBtn.setAttribute('aria-expanded', 'false');
+    helpBtn.focus();
+  });
+
+  themeToggleBtn.addEventListener('click', () => {
+    document.body.classList.toggle('light-theme');
+    themeToggleBtn.setAttribute('aria-pressed', document.body.classList.contains('light-theme'));
+  });
+
+  mobileMenuBtn.addEventListener('click', () => {
+    const isOpen = sidebar.classList.toggle('open');
+    mobileMenuBtn.setAttribute('aria-expanded', isOpen.toString());
+  });
+
+  function init() {
+    switchSection('overview');
+    renderNodes();
+    renderMessages();
+    updateNextRoundButton();
+    clearResults();
+    document.documentElement.style.scrollBehavior = 'smooth';
+  }
+
+  init();
+
+  helpDialog.addEventListener('keydown', (event) => {
+    if (event.key === 'Tab') {
+      const focusables = helpDialog.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      if (focusables.length === 0) return;
+
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    } else if (event.key === 'Escape') {
+      helpDialog.close();
+      helpBtn.setAttribute('aria-expanded', 'false');
+      helpBtn.focus();
+    }
+  });
+</script>
+
+
+  <style>
+    /* Light theme overrides */
+    body.light-theme {
+      background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+      color: #222;
+    }
+    body.light-theme header {
+      background: rgba(250,250,255,0.85);
+      color: #350058;
+    }
+    body.light-theme .brand {
+      background: linear-gradient(90deg, #6e48aa, #9d50bb);
+    }
+    body.light-theme aside.sidebar {
+      background: rgba(250,250,255,0.9);
+      color: #350058;
+      box-shadow: inset -1px 0 0 rgba(157,80,187,0.15);
+    }
+    body.light-theme .nav-list li button {
+      color: #500066;
+    }
+    body.light-theme .nav-list li button:hover,
+    body.light-theme .nav-list li button:focus {
+      background-color: rgba(157,80,187,0.2);
+      color: #7b3fb2;
+    }
+    body.light-theme main.content {
+      background: rgba(250,250,255,0.9);
+      color: #350058;
+    }
+    body.light-theme .simulation {
+      background: rgba(230, 230, 250, 0.9);
+      border-color: #6e48aa;
+      box-shadow: 0 8px 24px rgba(110, 72, 170, 0.3);
+      color: #350058;
+    }
+    body.light-theme .node {
+      background: rgba(255, 255, 255, 0.85);
+      color: #52006a;
+      box-shadow: 0 4px 8px rgba(110, 72, 170, 0.15);
+    }
+    body.light-theme .node .material-icons {
+      color: #7b3fb2;
+    }
+    body.light-theme .node.faulty {
+      background: #ffe6e6;
+      color: #a60000;
+      box-shadow: 0 0 12px 3px #ff4c4c88;
+      border-color: #a60000;
+    }
+    body.light-theme .node.faulty .material-icons {
+      color: #d94c4c;
+    }
+    body.light-theme .messages {
+      background: #f9f9ff;
+      color: #320033;
+      box-shadow: 0 6px 16px rgba(110, 72, 170, 0.15);
+    }
+    body.light-theme button.primary-btn {
+      background: linear-gradient(135deg, #6e48aa, #9d50bb);
+      box-shadow: 0 6px 20px rgba(157,80,187,0.3);
+    }
+    body.light-theme button.primary-btn:hover, body.light-theme button.primary-btn:focus {
+      box-shadow: 0 10px 30px rgba(157,80,187,0.5);
+    }
+    body.light-theme footer {
+      background: rgba(245,245,250,0.8);
+      color: #350058;
+      box-shadow: 0 -1px 6px rgba(157,80,187,0.15);
+    }
+  </style>
 </body>
 </html>
+

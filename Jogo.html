@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, iniciarial-scale=1" />
   <title>Jogo de Reconhecimento de Falhas Bizantinas</title>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Material+Icons" rel="stylesheet" />
   <style>
@@ -465,7 +465,7 @@
           </div>
 
           <div class="buttons">
-            <button class="primary-btn" id="next-round-btn" disabled>Próxima Rodada</button>
+            <button class="primary-btn" id="prox-btn" disabled>Próxima Rodada</button>
             <button class="primary-btn" id="reset-btn">Reiniciar</button>
           </div>
         </div>
@@ -473,7 +473,7 @@
 
       <section id="results" class="section" role="region" aria-label="Resultados e análise">
         <h1 class="section-title">Resultados</h1>
-        <p class="description" id="results-summary" tabindex="0">
+        <p class="description" id="resultados" tabindex="0">
           Nenhuma simulação realizada ainda.
         </p>
       </section>
@@ -510,7 +510,7 @@
   </dialog>
 
  <script>
-  const nodesData = [
+  const nomes = [
     { id: 1, label: 'Nó 1', faulty: false },
     { id: 2, label: 'Nó 2', faulty: true },
     { id: 3, label: 'Nó 3', faulty: false },
@@ -542,14 +542,14 @@
     ]
   ];
 
-  let currentRound = Math.floor(Math.random() * rounds.length);
+  let Round = Math.floor(Math.random() * rounds.length);
   const selectedFaultyNodes = new Set();
 
   const nodeNetworkEl = document.querySelector('.node-network');
-  const messageBoxEl = document.getElementById('Mbox');
-  const nextRoundBtn = document.getElementById('next-round-btn');
-  const resetBtn = document.getElementById('reset-btn');
-  const resultsSummaryEl = document.getElementById('results-summary');
+  const Mbox = document.getElementById('Mbox');
+  const proxBtn = document.getElementById('prox-btn');
+  const resetar = document.getElementById('reset-btn');
+  const resultados = document.getElementById('resultados');
   const sidebarButtons = document.querySelectorAll('.nav-list button');
   const sections = document.querySelectorAll('main.content section.section');
   const helpDialog = document.getElementById('helpDialog');
@@ -559,20 +559,20 @@
   const mobileMenuBtn = document.getElementById('mobile-menu-btn');
   const sidebar = document.getElementById('sidebar');
 
-  function focusFirstDescendant(element) {
+  function primeirodecendente(element) {
     for (const child of element.children) {
       if (child.tabIndex >= 0) {
         child.focus();
         return true;
       }
-      if (focusFirstDescendant(child)) return true;
+      if (primeirodecendente(child)) return true;
     }
     return false;
   }
 
-  function renderNodes() {
+  function MostrarNotas() {
     nodeNetworkEl.innerHTML = '';
-    nodesData.forEach(node => {
+    nomes.forEach(node => {
       const isFaulty = selectedFaultyNodes.has(node.id);
       const div = document.createElement('div');
       div.className = 'node';
@@ -607,63 +607,65 @@
     } else {
       selectedFaultyNodes.add(nodeId);
     }
-    renderNodes();
-    updateNextRoundButton();
-    announce(`Nó ${nodeId} ${selectedFaultyNodes.has(nodeId) ? 'marcado como falho' : 'desmarcado'}.`);
+    MostrarNotas();
+    atualizarproximoround();
+    anunciar(`Nó ${nodeId} ${selectedFaultyNodes.has(nodeId) ? 'marcado como falho' : 'desmarcado'}.`);
   }
 
-  function updateNextRoundButton() {
-    nextRoundBtn.disabled = selectedFaultyNodes.size === 0;
+  function atualizarproximoround() {
+    proxBtn.disabled = selectedFaultyNodes.size === 0;
   }
 
-  function renderMessages() {
+  function MostrarMensagem() {
     console.log("Carregando as mensagens");
-    messageBoxEl.innerHTML = '';
-    const roundMessages = rounds[currentRound];
+    Mbox.innerHTML = '';
+    console.log(Round)
+    const roundMensagem = rounds[Round];
 
-    roundMessages.forEach(msg => {
-      const p = document.createElement('p');
-      p.style.marginBottom = '6px';
-      const node = nodesData.find(n => n.id == msg.from);
+    roundMensagem.forEach(msg => {
+      const Linha = document.createElement('p');
+      Linha.style.marginBottom = '6px';
+      const node = nomes.find(n => n.id == msg.from);
       if (!node) return;
-      p.textContent = `${node.label}: ${msg.message}`;
-      messageBoxEl.appendChild(p);
-      console.log(p);
+      Linha.textContent = `${node.label}: ${msg.message}`;
+      Mbox.appendChild(Linha);
+      console.log(Linha);
     });
 
-    messageBoxEl.focus();
+    Mbox.focus();
   }
 
-  function announce(text) {
-    messageBoxEl.setAttribute('aria-live', 'polite');
-    messageBoxEl.textContent = text;
+  function anunciar(text) {
+    Mbox.setAttribute('aria-live', 'polite');
+    Mbox.textContent = text;
     setTimeout(() => {
-      messageBoxEl.textContent = '';
+      Mbox.textContent = '';
     }, 2000);
   }
 
-  nextRoundBtn.addEventListener('click', () => {
-    if (currentRound < rounds.length - 1) {
-      currentRound++;
-      renderMessages();
-      clearSelections();
-      updateNextRoundButton();
+  proxBtn.addEventListener('click', () => {
+    var count = 1
+    if (count < 1) {
+      count++;
+      MostrarMensagem();
+      LimparSelecao();
+      atualizarproximoround();
     } else {
-      showResults();
+      MostraResultados();
     }
   });
 
- resetBtn.addEventListener('click', () => {
+ resetar.addEventListener('click', () => {
   location.reload();
 });
 
-  function clearSelections() {
+  function LimparSelecao() {
     selectedFaultyNodes.clear();
-    renderNodes();
+    MostrarNotas();
   }
 
-  function showResults() {
-    const correctNodes = nodesData.filter(n => n.faulty).map(n => n.id);
+  function MostraResultados() {
+    const correctNodes = nomes.filter(n => n.faulty).map(n => n.id);
     const selectedNodes = Array.from(selectedFaultyNodes);
     const correctlyIdentified = selectedNodes.filter(id => correctNodes.includes(id));
     const missed = correctNodes.filter(id => !selectedNodes.includes(id));
@@ -681,24 +683,24 @@
         resultMsg += `Nó(s) marcados incorretamente: ${falsePositives.map(id => 'Nó ' + id).join(', ')}.`;
       }
     }
-    resultsSummaryEl.textContent = resultMsg;
-    switchSection('results');
-    announce('Resultados exibidos.');
+    resultados.textContent = resultMsg;
+    Mudarsecao('results');
+    anunciar('Resultados exibidos.');
   }
 
-  function clearResults() {
-    resultsSummaryEl.textContent = 'Nenhuma simulação realizada ainda.';
+  function LimparResultados() {
+    resultados.textContent = 'Nenhuma simulação realizada ainda.';
   }
 
   sidebarButtons.forEach(btn => {
     btn.addEventListener('click', e => {
       e.preventDefault();
       const target = btn.dataset.section;
-      switchSection(target);
+      Mudarsecao(target);
     });
   });
 
-  function switchSection(sectionId) {
+  function Mudarsecao(sectionId) {
     sections.forEach(sec => {
       const active = sec.id === sectionId;
       sec.classList.toggle('active', active);
@@ -719,7 +721,7 @@
   helpBtn.addEventListener('click', () => {
     helpDialog.showModal();
     helpBtn.setAttribute('aria-expanded', 'true');
-    focusFirstDescendant(helpDialog);
+    primeirodecendente(helpDialog);
   });
 
   helpCloseBtn.addEventListener('click', () => {
@@ -744,16 +746,16 @@
     mobileMenuBtn.setAttribute('aria-expanded', isOpen.toString());
   });
 
-  function init() {
-    switchSection('overview');
-    renderNodes();
-    renderMessages();
-    updateNextRoundButton();
-    clearResults();
+  function iniciar() {
+    Mudarsecao('overview');
+    MostrarNotas();
+    MostrarMensagem();
+    atualizarproximoround();
+    LimparResultados();
     document.documentElement.style.scrollBehavior = 'smooth';
   }
 
-  init();
+  iniciar();
 
   helpDialog.addEventListener('keydown', (event) => {
     if (event.key === 'Tab') {
